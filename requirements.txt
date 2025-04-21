@@ -26,11 +26,11 @@ exceptiongroup==1.2.2
 filelock==3.18.0
 Flask==3.1.0
 flatbuffers==25.2.10
-flet-core==0.18.0
-flet-desktop==0.27.6
-flet==0.18.0
-flet-runtime==0.18.0
-httpx==0.24.1
+flet-core
+flet-desktop
+flet
+flet-runtime
+httpx
 fonttools==4.56.0
 fpdf==1.7.2
 fsspec==2025.3.0
