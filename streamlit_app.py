@@ -9,6 +9,7 @@ import subprocess
 from fpdf import FPDF
 import yagmail
 from dotenv import load_dotenv
+import time  # Добавьте эту строку
 
 load_dotenv()  # загрузка переменных из .env
 
