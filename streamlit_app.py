@@ -9,7 +9,7 @@ import subprocess
 from fpdf import FPDF
 import yagmail
 from dotenv import load_dotenv
-import time  # Добавьте эту строку
+import time
 
 load_dotenv()  # загрузка переменных из .env
 
@@ -33,14 +33,6 @@ phrases = {
 
 selected_phrase = phrases[phrase_level]
 st.info(f"📖 **Read this phrase aloud:**\n\n*{selected_phrase}*")
-
-
-
-# Кнопка записи
-# if st.button("🔴 Record voice (10 seconds)"):
-#     with st.spinner("Recording..."):
-#         subprocess.run(["python", "record_audio.py"])
-#     st.success("✅ Voice recorded!")
 
 if st.button("🔴 Record voice (10 seconds)"):
     with st.spinner("Recording... Please speak now"):
