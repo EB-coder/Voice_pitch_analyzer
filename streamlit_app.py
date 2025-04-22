@@ -36,11 +36,21 @@ st.info(f"📖 **Read this phrase aloud:**\n\n*{selected_phrase}*")
 
 
 # Кнопка записи
+# if st.button("🔴 Record voice (10 seconds)"):
+#     with st.spinner("Recording..."):
+#         subprocess.run(["python", "record_audio.py"])
+#     st.success("✅ Voice recorded!")
+
 if st.button("🔴 Record voice (10 seconds)"):
-    with st.spinner("Recording..."):
+    with st.spinner("Recording... Please speak now"):
+        # Показываем прогресс
+        progress_bar = st.progress(0)
+        for i in range(10):
+            time.sleep(1)
+            progress_bar.progress((i + 1) / 10)
+        
         subprocess.run(["python", "record_audio.py"])
     st.success("✅ Voice recorded!")
-
 
 # Анализ
 if os.path.exists("voice.wav"):
