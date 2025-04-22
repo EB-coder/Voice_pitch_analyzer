@@ -10,6 +10,7 @@ from fpdf import FPDF
 import yagmail
 from dotenv import load_dotenv
 import time
+from st_audiorec import st_audiorec
 
 load_dotenv()  # загрузка переменных из .env
 
@@ -61,50 +62,64 @@ st.info(f"📖 **Read this phrase aloud:**\n\n*{selected_phrase}*")
 
 # Замените блок кнопки записи на этот:
 
-if st.button("🔴 Record voice (10 seconds)"):
-    with st.spinner("Preparing to record..."):
-        # Проверяем доступность аудиоустройств
-        try:
-            devices = sd.query_devices()
-            default_input = sd.default.device[0]
-            st.session_state.audio_device = default_input
-        except:
-            st.warning("⚠️ Could not query audio devices. Using default.")
+# if st.button("🔴 Record voice (10 seconds)"):
+#     with st.spinner("Preparing to record..."):
+#         # Проверяем доступность аудиоустройств
+#         try:
+#             devices = sd.query_devices()
+#             default_input = sd.default.device[0]
+#             st.session_state.audio_device = default_input
+#         except:
+#             st.warning("⚠️ Could not query audio devices. Using default.")
 
-    # Создаем контейнер для элементов управления записью
-    recording_container = st.empty()
+#     # Создаем контейнер для элементов управления записью
+#     recording_container = st.empty()
     
-    with recording_container.container():
-        st.info("🎤 Speak now! Recording for 10 seconds...")
-        progress_bar = st.progress(0)
-        status_text = st.empty()
+#     with recording_container.container():
+#         st.info("🎤 Speak now! Recording for 10 seconds...")
+#         progress_bar = st.progress(0)
+#         status_text = st.empty()
         
-        # Запускаем запись через subprocess
-        process = subprocess.Popen(
-            ["python", "record_audio.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+#         # Запускаем запись через subprocess
+#         process = subprocess.Popen(
+#             ["python", "record_audio.py"],
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.PIPE,
+#             text=True
+#         )
         
-        # Отображаем прогресс
-        for i in range(10):
-            time.sleep(1)
-            progress = (i + 1) / 10
-            progress_bar.progress(progress)
-            status_text.text(f"⏳ Recording... {i+1}/10 seconds")
+#         # Отображаем прогресс
+#         for i in range(10):
+#             time.sleep(1)
+#             progress = (i + 1) / 10
+#             progress_bar.progress(progress)
+#             status_text.text(f"⏳ Recording... {i+1}/10 seconds")
         
-        # Проверяем завершение
-        stdout, stderr = process.communicate()
+#         # Проверяем завершение
+#         stdout, stderr = process.communicate()
         
-        if process.returncode == 0:
-            recording_container.success("✅ Recording complete!")
-            if os.path.exists("voice.wav"):
-                st.audio("voice.wav", format='audio/wav')
-            else:
-                st.error("❌ Recording failed - no file created")
-        else:
-            st.error(f"❌ Recording failed: {stderr}")
+#         if process.returncode == 0:
+#             recording_container.success("✅ Recording complete!")
+#             if os.path.exists("voice.wav"):
+#                 st.audio("voice.wav", format='audio/wav')
+#             else:
+#                 st.error("❌ Recording failed - no file created")
+#         else:
+#             st.error(f"❌ Recording failed: {stderr}")
+
+audio_data = st_audiorec()
+
+if audio_data is not None:
+    # Сохраняем записанное аудио в файл
+    with wave.open("voice.wav", "wb") as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(44100)
+        wav_file.writeframes(audio_data)
+    
+    st.success("✅ Voice recorded!")
+    st.audio("voice.wav", format='audio/wav')
+    
 # Анализ
 if os.path.exists("voice.wav"):
     st.audio("voice.wav", format='audio/wav')
