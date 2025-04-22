@@ -2,43 +2,39 @@ import sounddevice as sd
 import numpy as np
 import wave
 import sys
+from datetime import datetime
 
-def record_audio():
-    RATE = 44100
-    CHANNELS = 1
-    DTYPE = np.int16
-    RECORD_SECONDS = 10
-    OUTPUT_FILENAME = "voice.wav"
-
-    print("🎙️ Recording started...", flush=True)
+def record_audio(filename="voice.wav", duration=10, sample_rate=44100):
+    print(f"🎤 Starting recording for {duration} seconds...", flush=True)
     
     try:
-        audio = sd.rec(
-            int(RECORD_SECONDS * RATE),
-            samplerate=RATE,
-            channels=CHANNELS,
-            dtype=DTYPE
+        # Записываем аудио
+        recording = sd.rec(
+            int(duration * sample_rate),
+            samplerate=sample_rate,
+            channels=1,
+            dtype=np.int16
         )
         
         # Выводим прогресс в консоль
-        for i in range(RECORD_SECONDS):
-            print(f"⏱️ {i+1}/{RECORD_SECONDS} sec", flush=True)
-            sd.sleep(1000)  # Используем встроенное ожидание sounddevice
+        for i in range(duration):
+            print(f"⏳ {i+1}/{duration} seconds recorded", flush=True)
+            sd.sleep(1000)  # Ждем 1 секунду
         
-        sd.wait()
-        print("✅ Recording complete", flush=True)
+        sd.wait()  # Ожидаем завершения записи
         
-        with wave.open(OUTPUT_FILENAME, 'wb') as wf:
-            wf.setnchannels(CHANNELS)
+        # Сохраняем в файл
+        with wave.open(filename, 'wb') as wf:
+            wf.setnchannels(1)
             wf.setsampwidth(2)
-            wf.setframerate(RATE)
-            wf.writeframes(audio.tobytes())
+            wf.setframerate(sample_rate)
+            wf.writeframes(recording.tobytes())
         
-        print(f"📁 Saved to {OUTPUT_FILENAME}", flush=True)
+        print(f"✅ Successfully saved to {filename}", flush=True)
         return True
     
     except Exception as e:
-        print(f"❌ Error: {str(e)}", flush=True)
+        print(f"❌ Error during recording: {str(e)}", flush=True)
         return False
 
 if __name__ == "__main__":
