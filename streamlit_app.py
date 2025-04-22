@@ -44,14 +44,28 @@ st.info(f"📖 **Read this phrase aloud:**\n\n*{selected_phrase}*")
 
 if st.button("🔴 Record voice (10 seconds)"):
     with st.spinner("Recording... Please speak now"):
-        # Показываем прогресс
+        # Создаем элементы интерфейса
+        status_text = st.empty()
         progress_bar = st.progress(0)
+        
+        # Запускаем запись в фоне
+        process = subprocess.Popen(["python", "record_audio.py"])
+        
+        # Отображаем прогресс
         for i in range(10):
             time.sleep(1)
             progress_bar.progress((i + 1) / 10)
+            status_text.text(f"Recording... {i+1}/10 seconds")
         
-        subprocess.run(["python", "record_audio.py"])
-    st.success("✅ Voice recorded!")
+        # Дожидаемся завершения
+        process.wait()
+    
+    # Проверяем результат
+    if os.path.exists("voice.wav"):
+        st.success("✅ Voice recorded!")
+        st.audio("voice.wav", format='audio/wav')
+    else:
+        st.error("❌ Recording failed - no audio file created")
 
 # Анализ
 if os.path.exists("voice.wav"):
