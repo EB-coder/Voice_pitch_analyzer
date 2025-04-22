@@ -2,8 +2,7 @@ streamlit==1.44.1
 numpy==1.26.4
 scipy==1.13.0
 matplotlib==3.10.1
-sounddevice==0.4.6
 fpdf==1.7.2
 yagmail==0.15.293
 python-dotenv==1.0.0
-
+streamlit-audiorec
