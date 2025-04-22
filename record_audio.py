@@ -47,39 +47,45 @@
 import sounddevice as sd
 import numpy as np
 import wave
-import time
+import sys  # Добавлено для вывода в реальном времени
 
-# Параметры записи
-RATE = 44100
-CHANNELS = 1
-DTYPE = np.int16
-RECORD_SECONDS = 10
-OUTPUT_FILENAME = "voice.wav"
+def record_audio():
+    RATE = 44100
+    CHANNELS = 1
+    DTYPE = np.int16
+    RECORD_SECONDS = 10
+    OUTPUT_FILENAME = "voice.wav"
 
-print("🎙️ Recording... Speak now!")
+    print("🎙️ Recording started...", flush=True)  # flush для Streamlit
+    
+    try:
+        audio = sd.rec(
+            int(RECORD_SECONDS * RATE),
+            samplerate=RATE,
+            channels=CHANNELS,
+            dtype=DTYPE
+        )
+        
+        # Выводим прогресс в консоль
+        for i in range(RECORD_SECONDS):
+            print(f"⏱️ {i+1}/{RECORD_SECONDS} sec", flush=True)
+            sd.sleep(1000)  # Используем встроенное ожидание sounddevice
+        
+        sd.wait()
+        print("✅ Recording complete", flush=True)
+        
+        with wave.open(OUTPUT_FILENAME, 'wb') as wf:
+            wf.setnchannels(CHANNELS)
+            wf.setsampwidth(2)
+            wf.setframerate(RATE)
+            wf.writeframes(audio.tobytes())
+        
+        print(f"📁 Saved to {OUTPUT_FILENAME}", flush=True)
+        return True
+    
+    except Exception as e:
+        print(f"❌ Error: {str(e)}", flush=True)
+        return False
 
-# Запись с явным указанием длительности
-audio = sd.rec(
-    int(RECORD_SECONDS * RATE),
-    samplerate=RATE,
-    channels=CHANNELS,
-    dtype=DTYPE
-)
-
-# Визуальный прогресс записи
-for i in range(RECORD_SECONDS):
-    time.sleep(1)
-    print(f"⏱️ Recording... {i+1}/{RECORD_SECONDS} seconds")
-
-# Убедимся, что запись завершена
-sd.wait()
-print("✅ Recording complete.")
-
-# Сохранить в WAV файл
-with wave.open(OUTPUT_FILENAME, 'wb') as wf:
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(2)  # Для np.int16
-    wf.setframerate(RATE)
-    wf.writeframes(audio.tobytes())
-
-print(f"📁 File saved as {OUTPUT_FILENAME}")
+if __name__ == "__main__":
+    record_audio()
