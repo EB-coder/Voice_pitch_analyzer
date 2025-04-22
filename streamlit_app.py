@@ -34,31 +34,77 @@ phrases = {
 selected_phrase = phrases[phrase_level]
 st.info(f"📖 **Read this phrase aloud:**\n\n*{selected_phrase}*")
 
-if st.button("🔴 Record voice (10 seconds)"):
-    with st.spinner("Recording... Please speak now"):
-        # Создаем элементы интерфейса
-        status_text = st.empty()
-        progress_bar = st.progress(0)
+# if st.button("🔴 Record voice (10 seconds)"):
+#     with st.spinner("Recording... Please speak now"):
+#         # Создаем элементы интерфейса
+#         status_text = st.empty()
+#         progress_bar = st.progress(0)
         
-        # Запускаем запись в фоне
-        process = subprocess.Popen(["python", "record_audio.py"])
+#         # Запускаем запись в фоне
+#         process = subprocess.Popen(["python", "record_audio.py"])
+        
+#         # Отображаем прогресс
+#         for i in range(10):
+#             time.sleep(1)
+#             progress_bar.progress((i + 1) / 10)
+#             status_text.text(f"Recording... {i+1}/10 seconds")
+        
+#         # Дожидаемся завершения
+#         process.wait()
+    
+#     # Проверяем результат
+#     if os.path.exists("voice.wav"):
+#         st.success("✅ Voice recorded!")
+#         st.audio("voice.wav", format='audio/wav')
+#     else:
+#         st.error("❌ Recording failed - no audio file created")
+
+# Замените блок кнопки записи на этот:
+
+if st.button("🔴 Record voice (10 seconds)"):
+    with st.spinner("Preparing to record..."):
+        # Проверяем доступность аудиоустройств
+        try:
+            devices = sd.query_devices()
+            default_input = sd.default.device[0]
+            st.session_state.audio_device = default_input
+        except:
+            st.warning("⚠️ Could not query audio devices. Using default.")
+
+    # Создаем контейнер для элементов управления записью
+    recording_container = st.empty()
+    
+    with recording_container.container():
+        st.info("🎤 Speak now! Recording for 10 seconds...")
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        # Запускаем запись через subprocess
+        process = subprocess.Popen(
+            ["python", "record_audio.py"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
         
         # Отображаем прогресс
         for i in range(10):
             time.sleep(1)
-            progress_bar.progress((i + 1) / 10)
-            status_text.text(f"Recording... {i+1}/10 seconds")
+            progress = (i + 1) / 10
+            progress_bar.progress(progress)
+            status_text.text(f"⏳ Recording... {i+1}/10 seconds")
         
-        # Дожидаемся завершения
-        process.wait()
-    
-    # Проверяем результат
-    if os.path.exists("voice.wav"):
-        st.success("✅ Voice recorded!")
-        st.audio("voice.wav", format='audio/wav')
-    else:
-        st.error("❌ Recording failed - no audio file created")
-
+        # Проверяем завершение
+        stdout, stderr = process.communicate()
+        
+        if process.returncode == 0:
+            recording_container.success("✅ Recording complete!")
+            if os.path.exists("voice.wav"):
+                st.audio("voice.wav", format='audio/wav')
+            else:
+                st.error("❌ Recording failed - no file created")
+        else:
+            st.error(f"❌ Recording failed: {stderr}")
 # Анализ
 if os.path.exists("voice.wav"):
     st.audio("voice.wav", format='audio/wav')
