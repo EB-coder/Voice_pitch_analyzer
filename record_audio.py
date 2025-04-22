@@ -47,6 +47,7 @@
 import sounddevice as sd
 import numpy as np
 import wave
+import time
 
 # Параметры записи
 RATE = 44100
@@ -55,9 +56,23 @@ DTYPE = np.int16
 RECORD_SECONDS = 10
 OUTPUT_FILENAME = "voice.wav"
 
-print("🎙️ Pls speak...")
-audio = sd.rec(int(RECORD_SECONDS * RATE), samplerate=RATE, channels=CHANNELS, dtype=DTYPE)
-sd.wait()  # Дождаться окончания записи
+print("🎙️ Recording... Speak now!")
+
+# Запись с явным указанием длительности
+audio = sd.rec(
+    int(RECORD_SECONDS * RATE),
+    samplerate=RATE,
+    channels=CHANNELS,
+    dtype=DTYPE
+)
+
+# Визуальный прогресс записи
+for i in range(RECORD_SECONDS):
+    time.sleep(1)
+    print(f"⏱️ Recording... {i+1}/{RECORD_SECONDS} seconds")
+
+# Убедимся, что запись завершена
+sd.wait()
 print("✅ Recording complete.")
 
 # Сохранить в WAV файл
